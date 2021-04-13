@@ -12,7 +12,7 @@
 #include "simAVRHeader.h"
 #endif
 
-volatile int TimerFlag = 0;
+//volatile int TimerFlag = 0;
 //void TimerISR() {
 //   TimerFlag = 1;
 //}
@@ -93,18 +93,20 @@ int main(void) {
     PORTA = 0xFF;
     PORTB = 0x00;
     /* Insert your solution below */
-   int LoHiElapsedTime = 1000;
-   int periodGCD = 1000;
+   //int LoHiElapsedTime = 1000;
+   //int periodGCD = 1000;
    //TimerSet(periodGCD);
    //TimerOn();
+   SM1_STATE = SM1_SMStart;
    while(1){
-      if (LoHiElapsedTime >= 1000){
+	
+      //if (LoHiElapsedTime >= 1000){
          Tick_LoHi();
-         LoHiElapsedTime = 0;
-      }
-      LoHiElapsedTime += 1000;
-      while(!TimerFlag);
-      TimerFlag=0;
+      //   LoHiElapsedTime = 0;
+      //}
+      //LoHiElapsedTime += 1000;
+      //while(!TimerFlag);
+      //TimerFlag=0;
    }
     return 1;
 }
