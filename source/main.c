@@ -1,102 +1,112 @@
 /*	Author: jhuan314
- *	 *  Partner(s) Name:Jack Huang 
- *	  *	Lab Section:23
- *	   *	Assignment: Lab pound4  Exercise pound1
- *	    *	Exercise Description: [optional - include for your own benefit]
- *	     *
- *	      *	I acknowledge all content contained herein, excluding template or example
- *	       *	code, is my own original work.
- *	        */
+ *  Partner(s) Name:Jack Huang 
+ *	Lab Section:23
+ *	Assignment: Lab #4  Exercise #1
+ *	Exercise Description: [optional - include for your own benefit]
+ *
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
+ */
 #include <avr/io.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
-enum SM1_STATES { SM1_SMStart, presspound, releasepound, pressY, releaseY, lock} SM1_STATE;
+//volatile int TimerFlag = 0;
+//void TimerISR() {
+//   TimerFlag = 1;
+//}
+
+enum SM1_STATES { SM1_SMStart, SM1_s0, SM1_s1, SM1_s2, SM1_s4} SM1_STATE;
 void Tick_LoHi() { 
    switch(SM1_STATE) { 
       case SM1_SMStart:
-         SM1_STATE = presspound;
-         break;
-      case presspound:
-         if ((PINA&0x87)==0x80) {
-             SM1_STATE = lock;
+         if (1) {
+            SM1_STATE = SM1_s0;
          }
-         else if ((PINA&0x07)==0x04) {
-            SM1_STATE = releasepound;
+         break;
+      case SM1_s0:
+         if (!PINA&&0x01) {
+            SM1_STATE = SM1_s4;
+         }
+         else if (PINA&&0x01) {
+            SM1_STATE = SM1_s0;
          }
          else {
-            SM1_STATE = presspound;
+            SM1_STATE = SM1_s0;
          }
          break;
-      case releasepound:
-         if ((PINA&0x07)==0x04) {
-            SM1_STATE = releasepound;
+      case SM1_s1:
+         if (!PINA&&0x01) {
+            SM1_STATE = SM1_s2;
          }
-         else if (PINA==0x00) {
-            SM1_STATE = pressY;
-         }
-         break;
-      case pressY:
-         if (((PINA&0x07)==0x02)&&((PORTB&0x01)==0x01)) {
-            SM1_STATE = lock;
-         }
-         else if ((PINA&0x07)==0x02) {
-            SM1_STATE = releaseY;
-         }
-         else if (PINA!=0x00) {
-            SM1_STATE = presspound;
-         }
-	     else {
-            SM1_STATE = pressY;
-         }
-         break;
-      case releaseY:
-         if ((PINA&0x07)==0x02) {
-            SM1_STATE = releaseY;
+         else if (PINA&&0x01) {
+            SM1_STATE = SM1_s1;
          }
          else {
-            SM1_STATE = presspound;
+            SM1_STATE = SM1_s1;
          }
          break;
-      case lock:
-        if(((PINA&0x07)==0x02)){
-            SM1_STATE = lock;
-        }
-        else if((PINA&0x87)==0x80){
-            SM1_STATE = lock;
-        }
-        else{
-            SM1_STATE = presspound;
-        }
+      case SM1_s2:
+         if (PINA&&0x01) {
+            SM1_STATE = SM1_s0;
+         }
+         else {
+            SM1_STATE = SM1_s2;
+         }
+         break;
+      case SM1_s4:
+         if (PINA&&0x01) {
+            SM1_STATE = SM1_s1;
+         }
+         else {
+            SM1_STATE = SM1_s4;
+         }
+         break;
+      default:
+         SM1_STATE = SM1_s0;
+         break;
    }
    switch(SM1_STATE) { 
-      case SM1_SMStart:   
-         PORTB=0;     
+      case SM1_SMStart:
+         
          break;
-      case presspound:
+      case SM1_s0:
+         PORTB = 1;
          break;
-      case releasepound:    
+      case SM1_s1:
+         PORTB = 2;
          break;
-      case pressY:      
+      case SM1_s2:
+         
          break;
-      case releaseY:
-         PORTB=1;
-         break;
-      case lock:
-         PORTB=0;
+      case SM1_s4:
+         
          break;
    }
 }
 
 int main(void) {
+    /* Insert DDR and PORT initializations */
     DDRA = 0x00;
     DDRB = 0xFF;
     PORTA = 0xFF;
     PORTB = 0x00;
-    SM1_STATE = SM1_SMStart;
+    /* Insert your solution below */
+   //int LoHiElapsedTime = 1000;
+   //int periodGCD = 1000;
+   //TimerSet(periodGCD);
+   //TimerOn();
+   SM1_STATE = SM1_SMStart;
    while(1){
-	Tick_LoHi();
+	
+      //if (LoHiElapsedTime >= 1000){
+         Tick_LoHi();
+      //   LoHiElapsedTime = 0;
+      //}
+      //LoHiElapsedTime += 1000;
+      //while(!TimerFlag);
+      //TimerFlag=0;
    }
     return 1;
 }
