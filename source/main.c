@@ -21,15 +21,18 @@ void Tick_StateMachine1() {
          SM1_STATE = init;
          break;
       case check:
-         if ((PINA&0x01)==0x01) {
+         if((PINA&0x03)==0x03){
+	    SM1_STATE = reset;
+	 }
+         else if ((PINA&0x01)==0x01) {
             SM1_STATE = plus;
          }
          else if ((PINA&0x02)==0x02) {
             SM1_STATE = minus;
          }
-         else if ((PINA&0x03) == 0x03) {
-            SM1_STATE = reset;
-         }
+         //else if ((PINA&0x03) == 0x03) {
+         //   SM1_STATE = reset;
+         //}
          else {
             SM1_STATE = check;
          }
@@ -38,10 +41,10 @@ void Tick_StateMachine1() {
          SM1_STATE = waitplus;
          break;
       case waitplus:
-         if ((PINA&0x03) == 0x03) {
-            SM1_STATE = reset;
-         }
-         else if ((PINA&0x01)==0x01) {
+         //if ((PINA&0x03) == 0x03) {
+         //   SM1_STATE = reset;
+         //}
+         if ((PINA&0x01)==0x01) {
             SM1_STATE = waitplus;
          }
          else{
@@ -67,11 +70,11 @@ void Tick_StateMachine1() {
          }
          break;
       case waitminus:
-         if ((PINA&0x02)==0x02) {
-            SM1_STATE = waitminus;
-         }
-	 else if ((PINA&0x03) == 0x03) {
+         if ((PINA&0x03) == 0x03) {
             SM1_STATE = reset;
+         }
+         else if ((PINA&0x02)==0x02) {
+            SM1_STATE = waitminus;
          }
          else {
             SM1_STATE = check;
