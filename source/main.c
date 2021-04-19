@@ -1,93 +1,138 @@
 /*	Author: jhuan314
- *	 *	 *  Partner(s) Name:Jack Huang 
- *	  *	  *	Lab Section:23
- *	   *	   *	Assignment: Lab #4  Exercise #5
- *	    *	    *	Exercise Description: [optional - include for your own benefit]
- *	     *	     *
- *	      *	      *	I acknowledge all content contained herein, excluding template or example
- *	       *	       *	code, is my own original work.
- *	        *	        */
+ *  Partner(s) Name:Jack Huang 
+ *	Lab Section:23
+ *	Assignment: Lab #4  Exercise #1
+ *	Exercise Description: [optional - include for your own benefit]
+ *
+ *	I acknowledge all content contained herein, excluding template or example
+ *	code, is my own original work.
+ */
 #include <avr/io.h>
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
-unsigned char temp=0;
-unsigned char array[4]={4,1,2,1};
-enum SM1_STATES { SM1_SMStart, presscheck, releasecheck, lock, unlock} SM1_STATE;
-void Tick_LoHi() { 
+volatile int TimerFlag = 0;
+
+enum SM1_STATES { SM1_SMStart, check, plus, waitplus, minus, init, reset, waitminus, waitreset} SM1_STATE;
+void Tick_StateMachine1() { 
    switch(SM1_STATE) { 
       case SM1_SMStart:
-         SM1_STATE = presscheck;
+         SM1_STATE = init;
          break;
-      case presscheck:
-         if ((PINA&0x87)==0x80) {
-             SM1_STATE = lock;
+      case check:
+         if ((PINA&0x01)==0x01) {
+            SM1_STATE = plus;
          }
-         else if ((PINA&0x07)==array[temp]) {
-            SM1_STATE = releasecheck;
+         else if ((PINA&0x02)==0x02) {
+            SM1_STATE = minus;
+         }
+         else if ((PINA&0x03) == 0x03) {
+            SM1_STATE = reset;
          }
          else {
-            SM1_STATE = presscheck;
+            SM1_STATE = check;
          }
          break;
-      case releasecheck:
-	 if (((PINA&0x07)==0x01)&&((PORTB&0x01)==0x01)&&(temp==3)) {
-            SM1_STATE = lock;
+      case plus:
+         SM1_STATE = waitplus;
+         break;
+      case waitplus:
+         if ((PINA&0x03) == 0x03) {
+            SM1_STATE = reset;
          }
-         else if (((PINA&0x07)==0x01)&&(temp==3)) {
-            SM1_STATE = unlock;
+         else if ((PINA&0x01)==0x01) {
+            SM1_STATE = waitplus;
          }
-         else if (PINA==0x00) {
-	    temp++;
-            SM1_STATE = presscheck;
-         }
-	 else{
-	    SM1_STATE = releasecheck;
+         else{
+	    SM1_STATE = check;
 	 }
          break;
-      case unlock:
-        if (PINA==0x00) {
-	    temp=0;
-            SM1_STATE = presscheck;
+      case minus:
+         if (1) {
+            SM1_STATE = waitminus;
          }
-	else{
-	    SM1_STATE = unlock;
-	}
-      case lock:
-        if((PINA&0x87)==0x80){
-            SM1_STATE = lock;
-        }
-        else{
-	    temp=0;
-            SM1_STATE = presscheck;
-        }
+         break;
+      case init:
+         if (1) {
+            SM1_STATE = check;
+         }
+         break;
+      case reset:
+         if ((PINA&0x03)==0x03) {
+            SM1_STATE = reset;
+         }
+         else {
+            SM1_STATE = check;
+         }
+         break;
+      case waitminus:
+         if ((PINA&0x02)==0x02) {
+            SM1_STATE = waitminus;
+         }
+	 else if ((PINA&0x03) == 0x03) {
+            SM1_STATE = reset;
+         }
+         else {
+            SM1_STATE = check;
+         }
+         break;
+      case waitreset:
+         if ((PINA&0x03) == 0x03){
+            SM1_STATE = waitreset;
+         }
+         else {
+            SM1_STATE = check;
+         }
+         break;
+      default:
+         SM1_STATE = SM1_SMStart;
+         break;
    }
    switch(SM1_STATE) { 
-      case SM1_SMStart:   
-         PORTB=0;     
+      case SM1_SMStart: 
+         PORTC=7;    
          break;
-      case presscheck:
+      case check:
          break;
-      case releasecheck:    
+      case plus:
+         if(PORTC<9){
+	     PORTC=PORTC+1;
+ 	 }
          break;
-      case unlock:
-	 PORTB=1;
-	 break;
-      case lock:
-         PORTB=0;
+      case waitplus:        
+         break;
+      case minus:
+         if(PORTC>0){	     
+	     PORTC=PORTC-1;
+	 }
+         break;
+      case init:
+         PORTC=7;
+         break;
+      case reset:
+         PORTC=0;
+         break;
+      case waitminus:
+         break;
+      case waitreset:
+         break;
+      default:
+	 PORTC=7;
          break;
    }
 }
 
 int main(void) {
+    /* Insert DDR and PORT initializations */
     DDRA = 0x00;
-    DDRB = 0xFF;
+    DDRC = 0xFF;
     PORTA = 0xFF;
-    PORTB = 0x00;
-    SM1_STATE = SM1_SMStart;
+    PORTC = 0x00;
+	
+    /* Insert your solution below */
    while(1){
-	Tick_LoHi();
+	Tick_StateMachine1();
    }
     return 1;
 }

@@ -21,10 +21,10 @@ void Tick_StateMachine1() {
          SM1_STATE = init;
          break;
       case check:
-         if (PINA&&0x01) {
+         if ((PINA&0x01)==0x01) {
             SM1_STATE = plus;
          }
-         else if (PINA&&0x02) {
+         else if ((PINA&0x02)==0x02) {
             SM1_STATE = minus;
          }
          else if ((PINA&0x03) == 0x03) {
@@ -41,12 +41,12 @@ void Tick_StateMachine1() {
          if ((PINA&0x03) == 0x03) {
             SM1_STATE = reset;
          }
-         else if (PINA&&0x01) {
+         else if ((PINA&0x01)==0x01) {
             SM1_STATE = waitplus;
          }
-         else if (!(PINA&&0x01)) {
-            SM1_STATE = check;
-         }
+         else{
+	    SM1_STATE = check;
+	 }
          break;
       case minus:
          if (1) {
@@ -59,14 +59,11 @@ void Tick_StateMachine1() {
          }
          break;
       case reset:
-         if (!((PINA&&0x01) && (PINA&&0x02))) {
-            SM1_STATE = check;
-         }
-         else if ((PINA&&0x01) && (PINA&&0x02)) {
+         if ((PINA&0x03)==0x03) {
             SM1_STATE = reset;
          }
          else {
-            SM1_STATE = reset;
+            SM1_STATE = check;
          }
          break;
       case waitminus:
@@ -106,7 +103,7 @@ void Tick_StateMachine1() {
       case waitplus:        
          break;
       case minus:
-         if(PORTC>0){
+         if(PORTC>0){	     
 	     PORTC=PORTC-1;
 	 }
          break;
